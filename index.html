@@ -1,1 +1,460 @@
-Under Development
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tone — a tiny sound lab</title>
+<style>
+  :root {
+    --bg: #0e0f13;
+    --panel: #16181f;
+    --panel-2: #1d2029;
+    --border: #262a35;
+    --text: #e8eaf0;
+    --muted: #9aa2b1;
+    --accent: #7c5cff;
+    --accent-2: #39d3c3;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(1100px 600px at 75% -10%, #1a1b3a 0%, transparent 60%),
+      radial-gradient(800px 500px at 0% 100%, #102a2a 0%, transparent 55%),
+      var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 0;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-size: 1.15rem;
+  }
+
+  .logo-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 0 18px rgba(124, 92, 255, 0.55);
+  }
+
+  nav {
+    display: flex;
+    gap: 20px;
+    font-size: 0.9rem;
+  }
+
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  nav a:hover { color: var(--text); }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 56px;
+    align-items: center;
+    padding: 48px 0 72px;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    margin: 0 0 16px;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+  }
+
+  h1 span {
+    background: linear-gradient(100deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .lead {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    max-width: 44ch;
+  }
+
+  /* ---------- Player card ---------- */
+  .player {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    display: grid;
+    gap: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  }
+
+  .readout {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .readout .freq { font-size: 1.35rem; font-weight: 600; }
+  .readout .note {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--accent-2);
+    font-size: 1.05rem;
+  }
+
+  .waves {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .wave {
+    padding: 9px 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .wave:hover { color: var(--text); border-color: #3a4050; }
+
+  .wave[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .field { display: grid; gap: 8px; }
+
+  .field label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    height: 22px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  #play {
+    width: 100%;
+    padding: 15px;
+    border: 0;
+    border-radius: 12px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #0b0c10;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.2s, filter 0.2s;
+  }
+
+  #play:hover { filter: brightness(1.08); box-shadow: 0 10px 30px rgba(124, 92, 255, 0.35); }
+  #play:active { transform: translateY(1px); }
+
+  #play.on {
+    background: var(--panel-2);
+    color: var(--accent-2);
+    border: 1px solid var(--accent-2);
+    box-shadow: 0 0 0 1px rgba(57, 211, 195, 0.15), 0 0 28px rgba(57, 211, 195, 0.18);
+  }
+
+  /* ---------- Features ---------- */
+  .features {
+    padding: 24px 0 72px;
+    border-top: 1px solid var(--border);
+  }
+
+  .features h2 {
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    font-weight: 500;
+    margin: 32px 0 24px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .card .icon { font-size: 1.4rem; }
+  .card h3 { margin: 12px 0 6px; font-size: 1rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.55; }
+
+  /* ---------- Footer ---------- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 0 40px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 820px) {
+    .hero { grid-template-columns: 1fr; gap: 36px; padding-top: 24px; }
+    .grid { grid-template-columns: 1fr; }
+    nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="logo"><span class="logo-dot"></span> Tone</div>
+    <nav>
+      <a href="#player">Playground</a>
+      <a href="#about">About</a>
+      <a href="#">Source</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <div class="pill">Web Audio API</div>
+        <h1>A tiny <span>sound lab</span> in your browser.</h1>
+        <p class="lead">
+          Tone generates pure waveforms on the fly — no files, no libraries.
+          Pick a shape, drag the frequency, and listen to the math.
+        </p>
+      </div>
+
+      <div class="player" id="player">
+        <div class="readout">
+          <span class="freq" id="freqOut">440 Hz</span>
+          <span class="note" id="noteOut">A4</span>
+        </div>
+
+        <div class="waves" role="group" aria-label="Waveform">
+          <button class="wave" data-wave="sine" aria-pressed="true">Sine</button>
+          <button class="wave" data-wave="square" aria-pressed="false">Square</button>
+          <button class="wave" data-wave="triangle" aria-pressed="false">Triangle</button>
+          <button class="wave" data-wave="sawtooth" aria-pressed="false">Saw</button>
+        </div>
+
+        <div class="field">
+          <label for="freq">Frequency <span id="freqLabel">440 Hz</span></label>
+          <input type="range" id="freq" min="80" max="1200" step="1" value="440">
+        </div>
+
+        <div class="field">
+          <label for="vol">Volume <span id="volLabel">40%</span></label>
+          <input type="range" id="vol" min="0" max="100" step="1" value="40">
+        </div>
+
+        <button id="play">▶ Play tone</button>
+      </div>
+    </section>
+
+    <section class="features" id="about">
+      <h2>How it works</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="icon">🎛️</div>
+          <h3>Oscillators</h3>
+          <p>A single OscillatorNode is created the moment you hit play, then shaped and connected to your speakers.</p>
+        </div>
+        <div class="card">
+          <div class="icon">📉</div>
+          <h3>Click-free gain</h3>
+          <p>Volume fades are scheduled on the audio clock, so starting and stopping never produces a pop.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🧮</div>
+          <h3>Live note math</h3>
+          <p>Frequencies are converted to note names using the standard MIDI formula: <code>69 + 12·log₂(f/440)</code>.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Tone — a tiny sound lab.</span>
+    <span>Built with the Web Audio API.</span>
+  </footer>
+
+</div>
+
+<script>
+  const playBtn   = document.getElementById('play');
+  const freqInput = document.getElementById('freq');
+  const volInput  = document.getElementById('vol');
+  const freqOut   = document.getElementById('freqOut');
+  const noteOut   = document.getElementById('noteOut');
+  const freqLabel = document.getElementById('freqLabel');
+  const volLabel  = document.getElementById('volLabel');
+  const waveBtns  = document.querySelectorAll('.wave');
+
+  let audioCtx = null;
+  let gainNode = null;
+  let osc = null;
+  let playing = false;
+  let waveform = 'sine';
+
+  const MAX_GAIN = 0.25; // keep things gentle on the ears
+
+  function noteName(freq) {
+    if (!freq) return '—';
+    const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    const midi = Math.round(69 + 12 * Math.log2(freq / 440));
+    const name = names[((midi % 12) + 12) % 12];
+    const octave = Math.floor(midi / 12) - 1;
+    return name + octave;
+  }
+
+  function targetGain() {
+    return (Number(volInput.value) / 100) * MAX_GAIN;
+  }
+
+  function updateReadout() {
+    const f = Number(freqInput.value);
+    freqOut.textContent = f + ' Hz';
+    freqLabel.textContent = f + ' Hz';
+    noteOut.textContent = noteName(f);
+    volLabel.textContent = volInput.value + '%';
+  }
+
+  function ensureContext() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      gainNode = audioCtx.createGain();
+      gainNode.gain.value = 0;
+      gainNode.connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function startTone() {
+    ensureContext();
+
+    osc = audioCtx.createOscillator();
+    osc.type = waveform;
+    osc.frequency.value = Number(freqInput.value);
+    osc.connect(gainNode);
+    osc.start();
+
+    const t = audioCtx.currentTime;
+    gainNode.gain.cancelScheduledValues(t);
+    gainNode.gain.setValueAtTime(gainNode.gain.value, t);
+    gainNode.gain.linearRampToValueAtTime(targetGain(), t + 0.04);
+  }
+
+  function stopTone() {
+    if (!osc) return;
+    const t = audioCtx.currentTime;
+    gainNode.gain.cancelScheduledValues(t);
+    gainNode.gain.setValueAtTime(gainNode.gain.value, t);
+    gainNode.gain.linearRampToValueAtTime(0, t + 0.06);
+
+    const dying = osc;
+    osc = null;
+    dying.stop(t + 0.1);
+  }
+
+  playBtn.addEventListener('click', () => {
+    playing = !playing;
+    if (playing) {
+      startTone();
+      playBtn.textContent = '■ Stop tone';
+      playBtn.classList.add('on');
+    } else {
+      stopTone();
+      playBtn.textContent = '▶ Play tone';
+      playBtn.classList.remove('on');
+    }
+  });
+
+  freqInput.addEventListener('input', () => {
+    updateReadout();
+    if (osc) osc.frequency.setTargetAtTime(Number(freqInput.value), audioCtx.currentTime, 0.01);
+  });
+
+  volInput.addEventListener('input', () => {
+    updateReadout();
+    if (osc) gainNode.gain.setTargetAtTime(targetGain(), audioCtx.currentTime, 0.01);
+  });
+
+  waveBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      waveform = btn.dataset.wave;
+      waveBtns.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      if (osc) osc.type = waveform;
+    });
+  });
+
+  updateReadout();
+</script>
+
+</body>
+</html>
